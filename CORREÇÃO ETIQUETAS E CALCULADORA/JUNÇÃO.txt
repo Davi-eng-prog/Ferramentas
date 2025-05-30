@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Central de Ferramentas</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 0; margin: 0; overflow: hidden; }
+    header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 20px 30px; background: #e0e0e0; }
+    h1 { color: #222; margin: 0; font-size: 22px; }
+    .menu-container { display: flex; gap: 10px; flex-wrap: wrap; }
+    .menu-button { padding: 10px 20px; font-size: 16px; font-weight: bold; background: #1976d2; color: white; border: none; border-radius: 10px; cursor: pointer; text-decoration: none; transition: background 0.3s; }
+    .menu-button:hover { background: #125aa0; }
+    .oculto { display: none !important; }
+    iframe { width: 100vw; height: 100vh; border: none; display: none; }
+    #voltar { padding: 10px 20px; background: #444; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; margin: 0; text-align: center; position: absolute; bottom: 20px; left: 6%; transform: translateX(-50%); display: none; z-index: 10; }
+  </style>
+</head>
+<body>
+
+<header id="cabecalho">
+  <h1 id="titulo">🔧 Central de Ferramentas para Etiquetas e Cálculos</h1>
+  <div class="menu-container">
+    <a class="menu-button" id="btnZPL" href="#" onclick="abrirSistema('zpl')">🛒 SHOPEE</a>
+    <a class="menu-button" id="btnMeli" href="#" onclick="abrirSistema('meli')">📦 MERCADO LIVRE</a>
+    <a class="menu-button" id="btnCalc" href="#" onclick="abrirSistema('calculadora')">📊 PRECIFICADOR</a>
+  </div>
+</header>
+
+<iframe id="frameZPL" src="CORREÇÃO ETIQUETAS SHOPEE.html"></iframe>
+<iframe id="frameCalc" src="CALCULADORA.html" style="height: 100vh;"></iframe>
+<iframe id="frameMeli" src="CORREÇÃO ETIQUETAS MELI.html"></iframe>
+
+<button id="voltar" onclick="voltarMenu()">🔙 Voltar</button>
+
+<script>
+function abrirSistema(sistema) {
+  document.getElementById('frameZPL').style.display = 'none';
+  document.getElementById('frameCalc').style.display = 'none';
+  document.getElementById('frameMeli').style.display = 'none';
+  document.getElementById('cabecalho').classList.add('oculto');
+  document.getElementById('voltar').style.display = 'block';
+
+  if (sistema === 'zpl') document.getElementById('frameZPL').style.display = 'block';
+  if (sistema === 'calculadora') document.getElementById('frameCalc').style.display = 'block';
+  if (sistema === 'meli') document.getElementById('frameMeli').style.display = 'block';
+
+  localStorage.setItem('sistemaAtivo', sistema);
+}
+
+function voltarMenu() {
+  document.getElementById('frameZPL').style.display = 'none';
+  document.getElementById('frameCalc').style.display = 'none';
+  document.getElementById('frameMeli').style.display = 'none';
+  document.getElementById('cabecalho').classList.remove('oculto');
+  document.getElementById('voltar').style.display = 'none';
+
+  localStorage.removeItem('sistemaAtivo');
+}
+
+window.onload = function () {
+  const sistemaSalvo = localStorage.getItem('sistemaAtivo');
+  if (sistemaSalvo) {
+    abrirSistema(sistemaSalvo);
+  }
+};
+</script>
+
+</body>
+</html>

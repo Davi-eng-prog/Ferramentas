@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>CORREÇÃO ETIQUETA SHOPEE</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f9f9f9; }
+    textarea { width: 100%; height: 300px; margin-top: 10px; }
+    input[type="file"] { margin: 10px 0; }
+    button { padding: 10px 15px; margin-top: 10px; font-weight: bold; cursor: pointer; }
+    h2, h3 { color: #333; }
+  </style>
+</head>
+<body>
+
+<h2>🔄 CORREÇÃO ETIQUETA SHOPEE</h2>
+<input type="file" accept=".txt" id="fileInput">
+<button onclick="processarArquivo()">CORRIGIR</button>
+
+<h3>📄 NOVO ZPL:</h3>
+<textarea id="preview" readonly></textarea>
+<br>
+<button onclick="baixarArquivo()">📥 BAIXAR NOVO ZPL</button>
+
+<script>
+let novoConteudo = '';
+
+function processarArquivo() {
+  const input = document.getElementById('fileInput');
+  if (!input.files[0]) return alert('Selecione um arquivo .TXT');
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let conteudoOriginal = e.target.result;
+
+    // Coletar todos os blocos DANFE
+    const blocosDanfe = [...conteudoOriginal.matchAll(/\^XA[\s\S]*?DANFE Simplificado[\s\S]*?\^XZ/g)];
+    const dadosExtraidos = blocosDanfe.map(bloco => {
+      const itens = [...bloco[0].matchAll(/\^FD\s*([A-Z0-9\-]+)\s*-.*?-\s*([\d.,]+)\s*(KIT|UN|UNID)?/gi)];
+      return itens.map(item => `SKU: ${item[1]} - QT: ${item[2]} KIT`).join(' | ');
+    });
+
+    // Remove as DANFEs do conteúdo original
+    let conteudo = conteudoOriginal.replace(/\^XA[\s\S]*?DANFE Simplificado[\s\S]*?\^XZ/g, '');
+
+    // Também remove comandos extras
+    conteudo = conteudo.replace(/\^XA\^MMT,Y\^PON\^MNY\^FO0,0\^XGR:DEMO\.GRF,1,1\^FS\^PQ1,0,0,N\^XZ\^XA\^IDR:DEMO\.GRF\^FS\^XZ/g, '');
+
+    // Divide pelos blocos de etiquetas
+    const blocosZPL = conteudo.split(/(?=~DGR:DEMO\.GRF,124236,102,:Z64:)/g);
+    let resultado = '';
+
+    for (let i = 0; i < blocosZPL.length; i++) {
+      const bloco = blocosZPL[i];
+      const linhaSKUs = dadosExtraidos[i] || 'SKU: DESCONHECIDO - QT: 1,00';
+
+      const novoComando = `^XA^MMT,Y^PON^MNY^FO0,0^XGR:DEMO.GRF,1,1^FS\n^FO15,1175^A0N,22,22^FB600,2,0,L^FD${linhaSKUs}^FS\n^PQ1,0,0,N^XZ^XA^IDR:DEMO.GRF^FS^XZ`;
+      resultado += bloco.trim() + '\n' + novoComando + '\n\n';
+    }
+
+    novoConteudo = resultado.trim();
+    document.getElementById('preview').value = novoConteudo;
+  };
+
+  reader.readAsText(input.files[0]);
+}
+
+function baixarArquivo() {
+  const blob = new Blob([novoConteudo], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "comando_zpl_editado.txt";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+</script>
+
+</body>
+</html>
